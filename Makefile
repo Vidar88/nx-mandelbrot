@@ -36,6 +36,11 @@ DATA		:=	data
 INCLUDES	:=	include
 EXEFS_SRC	:=	exefs_src
 
+APP_TITLE   := Mandelbrot Demo
+APP_AUTHOR  := Vidar
+APP_VERSION := 1.0
+ICON 		:= icon.jpg
+
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------

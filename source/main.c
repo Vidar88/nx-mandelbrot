@@ -2,25 +2,18 @@
 #include <stdio.h>
 #include <switch.h>
 
-
 #include "../common/common.h"
 
 #define WIDTH 1280
 #define HEIGHT 720
 
-#define START_POS   -0.5
-#define START_ZOOM  (WIDTH * 0.25296875f)
-
-#define BAIL_OUT        2.0
-#define FLIPS           24
-
-#define ZOOM_FACTOR     4
-
 uint8_t* g_framebuf;
 u32 g_framebuf_width;
 int redraw = 1;
 int offset = 0;
-color_t colors[16];
+
+color_t black;
+color_t colors_wiki[16];
 
 void mandelbrot(int redraw) {
     int maxiter = 100;
@@ -39,30 +32,31 @@ void mandelbrot(int redraw) {
                     x = x_new;
                     iteration++;
                 }
-                if (iteration < maxiter) DrawPixelRaw(row, col, colors[iteration % 16]);
-                else DrawPixelRaw(row, col, MakeColor(0, 0, 0, 255));
+                if (iteration < maxiter) DrawPixelRaw(row, col, colors_wiki[iteration % 16]);
+                else DrawPixelRaw(row, col, black);
             }
         }
     }
 }
 
-void initColors() {
-    colors[0] = MakeColor(66, 30, 15, 255);
-    colors[1] = MakeColor(25, 7, 26, 255);
-    colors[2] = MakeColor(9, 1, 47, 255);
-    colors[3] = MakeColor(4, 4, 73, 255);
-    colors[4] = MakeColor(0, 7, 100, 255);
-    colors[5] = MakeColor(12, 44, 138, 255);
-    colors[6] = MakeColor(24, 82, 177, 255);
-    colors[7] = MakeColor(57, 125, 209, 255);
-    colors[8] = MakeColor(134, 181, 229, 255);
-    colors[9] = MakeColor(211, 236, 248, 255);
-    colors[10] = MakeColor(241, 233, 191, 255);
-    colors[11] = MakeColor(248, 201, 95, 255);
-    colors[12] = MakeColor(255, 170, 0, 255);
-    colors[13] = MakeColor(204, 128, 0, 255);
-    colors[14] = MakeColor(153, 87, 0, 255);
-    colors[15] = MakeColor(106, 52, 3, 255);
+void initColorMaps() {
+    black = MakeColor(0, 0, 0, 255);
+    colors_wiki[0] = MakeColor(66, 30, 15, 255);
+    colors_wiki[1] = MakeColor(25, 7, 26, 255);
+    colors_wiki[2] = MakeColor(9, 1, 47, 255);
+    colors_wiki[3] = MakeColor(4, 4, 73, 255);
+    colors_wiki[4] = MakeColor(0, 7, 100, 255);
+    colors_wiki[5] = MakeColor(12, 44, 138, 255);
+    colors_wiki[6] = MakeColor(24, 82, 177, 255);
+    colors_wiki[7] = MakeColor(57, 125, 209, 255);
+    colors_wiki[8] = MakeColor(134, 181, 229, 255);
+    colors_wiki[9] = MakeColor(211, 236, 248, 255);
+    colors_wiki[10] = MakeColor(241, 233, 191, 255);
+    colors_wiki[11] = MakeColor(248, 201, 95, 255);
+    colors_wiki[12] = MakeColor(255, 170, 0, 255);
+    colors_wiki[13] = MakeColor(204, 128, 0, 255);
+    colors_wiki[14] = MakeColor(153, 87, 0, 255);
+    colors_wiki[15] = MakeColor(106, 52, 3, 255);
 }
 
 int main(int argc, char **argv)
@@ -80,7 +74,7 @@ int main(int argc, char **argv)
     g_framebuf = gfxGetFramebuffer(&g_framebuf_width, NULL);
     memset(g_framebuf, 237, gfxGetFramebufferSize());
 
-    initColors();
+    initColorMaps();
 
     while(appletMainLoop())
     {
