@@ -7,30 +7,50 @@
 
 uint8_t* g_framebuf;
 u32 g_framebuf_width;
+int redraw = 1;
+int offset = 0;
+color_t colors[16];
 
-void mandelbrot() {
-    int row, col;
-    int width = 1280;
-    int height = 720;
-    int max = 100;
+void mandelbrot(int width, int height, int max, int offset, int redraw) {
+    if (redraw = 1) {
+        int row, col;
+        for (row = 0; row < width; row++) {
+            for (col = 0; col < height; col++) {
+                double c_re = (row - width / 2.0) * 4.0 / width;
+                double c_im = (col - height / 2.0) * 4.0 / width;
+                double x = 0, y = 0;
+                int iteration = 0;
 
-    for (row = 0; row < width; row++) {
-        for (col = 0; col < height; col++) {
-            double c_re = (row - width/2.0)*4.0/width;
-            double c_im = (col - height/2.0)*4.0/width;
-            double x = 0, y = 0;
-            int iteration = 0;
-
-            while ( x * x + y * y <= 4 && iteration < max) {
-                double x_new = x * x - y * y + c_re;
-                y = 2 * x * y + c_im;
-                x = x_new;
-                iteration++;
+                while ( x * x + y * y <= 4 && iteration < max) {
+                    double x_new = x * x - y * y + c_re;
+                    y = 2 * x * y + c_im;
+                    x = x_new;
+                    iteration++;
+                }
+                if (iteration < max) DrawPixelRaw(row, col, colors[iteration % 16]);
+                else DrawPixelRaw(row, col, MakeColor(0, 0, 0, 255));
             }
-            if (iteration < max) DrawPixelRaw(row, col, MakeColor(iteration % 4 * 64, iteration % 8 * 32, iteration % 16 * 16, 255));
-            else DrawPixelRaw(row, col, MakeColor(0, 0, 0, 255));
         }
     }
+}
+
+void initColors() {
+    colors[0] = MakeColor(66, 30, 15, 255);
+    colors[1] = MakeColor(25, 7, 26, 255);
+    colors[2] = MakeColor(9, 1, 47, 255);
+    colors[3] = MakeColor(4, 4, 73, 255);
+    colors[4] = MakeColor(0, 7, 100, 255);
+    colors[5] = MakeColor(12, 44, 138, 255);
+    colors[6] = MakeColor(24, 82, 177, 255);
+    colors[7] = MakeColor(57, 125, 209, 255);
+    colors[8] = MakeColor(134, 181, 229, 255);
+    colors[9] = MakeColor(211, 236, 248, 255);
+    colors[10] = MakeColor(241, 233, 191, 255);
+    colors[11] = MakeColor(248, 201, 95, 255);
+    colors[12] = MakeColor(255, 170, 0, 255);
+    colors[13] = MakeColor(204, 128, 0, 255);
+    colors[14] = MakeColor(153, 87, 0, 255);
+    colors[15] = MakeColor(106, 52, 3, 255);
 }
 
 int main(int argc, char **argv)
@@ -40,15 +60,15 @@ int main(int argc, char **argv)
 
     gfxInitDefault();
 
+    appletSetScreenShotPermission(1);
+
     //Set current resolution automatically depending on current/changed OperationMode. Only use this when using gfxInitResolution*().
     //gfxConfigureAutoResolutionDefault(true);
 
     g_framebuf = gfxGetFramebuffer(&g_framebuf_width, NULL);
     memset(g_framebuf, 237, gfxGetFramebufferSize());
 
-    mandelbrot();
-    DrawText(tahoma24, 40, 30, MakeColor(255, 255, 255, 255), "Mandelbrot demo by Vidar");
-    DrawText(tahoma24, 1050, 30, MakeColor(255, 255, 255, 255), "Press B to exit");
+    initColors();
 
     while(appletMainLoop())
     {
@@ -60,6 +80,21 @@ int main(int argc, char **argv)
         u32 kDown = hidKeysDown(CONTROLLER_P1_AUTO);
 
         if (kDown & KEY_B) break; // break in order to return to hbmenu
+        if (kDown & KEY_PLUS) {
+            offset++;
+            redraw = 1;
+        }
+        if (kDown & KEY_MINUS) {
+            offset--;
+            redraw = 1;
+        }
+
+        mandelbrot(1280, 720, 100, offset, redraw);
+        redraw = 0;
+
+        DrawText(tahoma24, 40, 30, MakeColor(255, 255, 255, 255), "Mandelbrot demo by Vidar");
+        DrawText(tahoma24, 1050, 30, MakeColor(255, 255, 255, 255), "Press B to exit");
+
 
         gfxFlushBuffers();
         gfxSwapBuffers();
