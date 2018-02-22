@@ -5,29 +5,41 @@
 
 #include "../common/common.h"
 
+#define WIDTH 1280
+#define HEIGHT 720
+
+#define START_POS   -0.5
+#define START_ZOOM  (WIDTH * 0.25296875f)
+
+#define BAIL_OUT        2.0
+#define FLIPS           24
+
+#define ZOOM_FACTOR     4
+
 uint8_t* g_framebuf;
 u32 g_framebuf_width;
 int redraw = 1;
 int offset = 0;
 color_t colors[16];
 
-void mandelbrot(int width, int height, int max, int offset, int redraw) {
-    if (redraw = 1) {
+void mandelbrot(int redraw) {
+    int maxiter = 100;
+    if (redraw == 1) {
         int row, col;
-        for (row = 0; row < width; row++) {
-            for (col = 0; col < height; col++) {
-                double c_re = (row - width / 2.0) * 4.0 / width;
-                double c_im = (col - height / 2.0) * 4.0 / width;
+        for (row = 0; row < WIDTH; row++) {
+            for (col = 0; col < HEIGHT; col++) {
+                double c_re = (row - WIDTH / 2.0) * 4.0 / WIDTH;
+                double c_im = (col - HEIGHT / 2.0) * 4.0 / WIDTH;
                 double x = 0, y = 0;
                 int iteration = 0;
 
-                while ( x * x + y * y <= 4 && iteration < max) {
+                while ( x * x + y * y <= 4 && iteration < maxiter) {
                     double x_new = x * x - y * y + c_re;
                     y = 2 * x * y + c_im;
                     x = x_new;
                     iteration++;
                 }
-                if (iteration < max) DrawPixelRaw(row, col, colors[iteration % 16]);
+                if (iteration < maxiter) DrawPixelRaw(row, col, colors[iteration % 16]);
                 else DrawPixelRaw(row, col, MakeColor(0, 0, 0, 255));
             }
         }
@@ -89,7 +101,7 @@ int main(int argc, char **argv)
             redraw = 1;
         }
 
-        mandelbrot(1280, 720, 100, offset, redraw);
+        mandelbrot(redraw);
         redraw = 0;
 
         DrawText(tahoma24, 40, 30, MakeColor(255, 255, 255, 255), "Mandelbrot demo by Vidar");
